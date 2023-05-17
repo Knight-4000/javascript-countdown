@@ -15,6 +15,8 @@ let countdownTitle = '';
 let countdownDate = '';
 let countdownValue = Date;
 let countdownActive;
+// Local Storage
+let savedCountdown;
 
 // Basic Math Section in Milliseconds
 
@@ -34,9 +36,8 @@ function updateDOM() {
     countdownActive = setInterval(() => {
     // How far it is in milliseconds from Jan 1 1970
     const now = new Date().getTime();
+    // "new" on line above is used with Date to create a new Date object
     const distance = countdownValue - now;
-    console.log('distance', distance);
-
     // Math floor returns largest whole number. 1.8 would be 1, not 2
     const days = Math.floor(distance / day);
     // % refers to remainder operator
@@ -45,13 +46,9 @@ function updateDOM() {
     const hours = Math.floor((distance % day) / hour );
     const minutes = Math.floor((distance % hour) / minute );
     const seconds = Math.floor((distance % minute) / second );
-    console.log(days, hours, minutes, seconds);
-
     // Hide Input
     inputContainer.hidden = true;
-
     // If the countdown has ended, show complete message
-
     if(distance < 0 ) {
         countdownEl.hidden = true;
         clearInterval(countdownActive);
@@ -81,7 +78,12 @@ function updateCountdown(e){
     // in the form it would have the value of 2
     countdownTitle = e.srcElement[0].value;
     countdownDate = e.srcElement[1].value;
-    console.log(countdownTitle, countdownDate);
+    savedCountdown = {
+        title: countdownTitle,
+        date: countdownDate,
+    };
+    // turns value into string to be stored in local storage
+    localStorage.setItem('countdown', JSON.stringify(savedCountdown));
     // Check for valid date
     // === means checking the value of something
     if (countdownDate === '') {
@@ -89,7 +91,7 @@ function updateCountdown(e){
     } else {
     // Get number version of current date, update DOM
         countdownValue = new Date(countdownDate).getTime();
-        console.log('countdown value:', countdownValue);
+        // Again, "new" on line above is creating a new time value
         updateDOM();
     }
 }
@@ -107,12 +109,29 @@ function reset() {
     //Reset values
     countdownTitle = '';
     countdownDate = '';
-
+    localStorage.removeItem('countdown');
 }
 
+// Local Storage
+function restorePreviousCountdown() {
+    // Get countdown from localStorage if available 
+    if(localStorage.getItem('countdown')) {
+        inputContainer.hidden = true;
+        // Returns string back into object started on line 85
+        savedCountdown = JSON.parse(localStorage.getItem('countdown'));
+        countdownTitle = savedCountdown.title;
+        countdownDate = savedCountdown.date;
+        countdownValue = new Date(countdownDate).getTime();
+        updateDOM();
+    }
+}
 
 // Event Listeners
 
 countdownForm.addEventListener('submit', updateCountdown)
 countdownBtn.addEventListener('click', reset);
 completeBtn.addEventListener('click', reset);
+
+// On Load, check localStorage
+
+restorePreviousCountdown();
