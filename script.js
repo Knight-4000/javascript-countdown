@@ -10,6 +10,7 @@ const timeElements = document.querySelectorAll('span');
 let countdownTitle = '';
 let countdownDate = '';
 let countdownValue = Date;
+let countdownActive;
 
 // Basic Math Section in Milliseconds
 
@@ -26,6 +27,7 @@ dateEl.setAttribute('min', today);
 // Populate Countdown / Complete UI
 
 function updateDOM() {
+    countdownActive = setInterval(() => {
     // How far it is in milliseconds from Jan 1 1970
     const now = new Date().getTime();
     const distance = countdownValue - now;
@@ -53,6 +55,7 @@ function updateDOM() {
     inputContainer.hidden = true;
     // Show Countdown
     countdownEl.hidden = false;
+    }, second);
 }
 
 // Take Values from Form Input
@@ -66,12 +69,34 @@ function updateCountdown(e){
     countdownTitle = e.srcElement[0].value;
     countdownDate = e.srcElement[1].value;
     console.log(countdownTitle, countdownDate);
+    // Check for valid date
+    // === means checking the value of something
+    if (countdownDate === '') {
+        alert('Please select date')
+    } else {
     // Get number version of current date, update DOM
-    countdownValue = new Date(countdownDate).getTime();
-    console.log('countdown value:', countdownValue);
-    updateDOM();
+        countdownValue = new Date(countdownDate).getTime();
+        console.log('countdown value:', countdownValue);
+        updateDOM();
+    }
 }
+
+// Reset all values
+
+function reset() {
+    // Hide Countdowns, show input
+    countdownEl.hidden = true;
+    inputContainer.hidden = false;
+    // Stop the countdown
+    clearInterval(countdownActive);
+    //Reset values
+    countdownTitle = '';
+    countdownDate = '';
+
+}
+
 
 // Event Listeners
 
 countdownForm.addEventListener('submit', updateCountdown)
+countdownBtn.addEventListener('click', reset);
